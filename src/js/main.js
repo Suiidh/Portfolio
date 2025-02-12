@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -43,8 +44,8 @@ loader.load('/assets/gaming_desktop_pc.glb', (gltf) => {
 // Liste des images des projets
 const projectImages = [
     '/assets/CV_Lucas_2024.jpg',
-    'images/project2.jpg',
-    'images/project3.jpg'
+    //'/assets/project2.jpg',
+    //'/assets/project3.jpg'
 ];
 let currentProjectIndex = 0;
 let screenMesh;
