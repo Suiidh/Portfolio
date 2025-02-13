@@ -32,12 +32,9 @@ loader.load('/assets/gaming_desktop_pc.glb', (gltf) => {
     pcModel.rotation.y = -Math.PI / 2;
 
     scene.add(pcModel);
-
-    // Position initiale de la caméra pour voir l’écran
     camera.position.set(0, 5, 15);
     camera.lookAt(0, 4.5, 0);
 
-    // Ajouter un écran sur le PC
     createScreen(-3, 2, -1.36);
 });
 
@@ -49,7 +46,6 @@ const projectImages = [
 ];
 let currentProjectIndex = 0;
 
-// Fonction pour créer l'écran et afficher une image dessus
 function createScreen(x, y, z) {
     const screenGeometry = new THREE.PlaneGeometry(6.5, 3.6);
     const screenTexture = new THREE.TextureLoader().load(projectImages[currentProjectIndex], (texture) => {
@@ -64,12 +60,10 @@ function createScreen(x, y, z) {
     screenMesh.rotation.x = -Math.PI / 45;
     scene.add(screenMesh);
 
-    // Ajuster la caméra pour cibler l'écran
     controls.target.set(screenMesh.position.x, screenMesh.position.y, screenMesh.position.z);
     controls.update();
 }
 
-// Met à jour l'image de l'écran
 function updateScreenImage() {
     if (screenMesh) {
         const newTexture = new THREE.TextureLoader().load(projectImages[currentProjectIndex], (texture) => {
@@ -82,7 +76,6 @@ function updateScreenImage() {
     }
 }
 
-// Écouteur pour changer d'image avec les flèches
 window.addEventListener('keydown', (event) => {
     if (event.key === 'ArrowRight') {
         currentProjectIndex = (currentProjectIndex + 1) % projectImages.length;
@@ -103,7 +96,53 @@ controls.zoomSpeed = 1.2;
 controls.minDistance = 3;
 controls.maxDistance = 20;
 
-// Fonction d'animation
+// Gestion du zoom avec animation fluide
+let isZoomed = false;
+const initialPosition = new THREE.Vector3(0, 5, 15);
+const zoomedPosition = new THREE.Vector3(-3, 2.4, 1);
+
+function animateZoom(targetPosition) {
+    let frame = 0;
+    const maxFrames = 30;
+    const startPosition = camera.position.clone();
+
+    function zoomStep() {
+        frame++;
+        const alpha = frame / maxFrames;
+        camera.position.lerpVectors(startPosition, targetPosition, alpha);
+        controls.target.set(screenMesh.position.x, screenMesh.position.y, screenMesh.position.z);
+        controls.update();
+
+        if (frame < maxFrames) {
+            requestAnimationFrame(zoomStep);
+        }
+    }
+
+    zoomStep();
+}
+
+function toggleZoom() {
+    isZoomed = !isZoomed;
+    const target = isZoomed ? zoomedPosition : initialPosition;
+    animateZoom(target);
+}
+
+// Raycaster pour détecter les clics
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+window.addEventListener('click', (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
+
+    if (intersects.length > 0 && intersects[0].object === screenMesh) {
+        toggleZoom();
+    }
+});
+
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
@@ -117,4 +156,11 @@ window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Dézoom avec la touche "Échap"
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isZoomed) {
+        toggleZoom();
+    }
 });
