@@ -89,6 +89,15 @@ loader.load('/assets/casque.glb', (gltf) => {
     scene.add(casque);
 });
 
+loader.load('/assets/lampe.glb', (gltf) => {
+    const lampe = gltf.scene;
+    lampe.scale.set(0.8, 0.8, 0.8); // Ajuste la taille selon tes besoins
+    lampe.position.set(-7.6, -0.68, -1); // Positionne le canapé dans la scène
+    lampe.rotation.set(0, 4, 0); // Ajuste l'orientation si nécessaire
+
+    scene.add(lampe);
+});
+
 // Liste des images des projets
 const projectImages = [
     '/assets/CV_Lucas_2024.jpg',
