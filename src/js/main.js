@@ -14,28 +14,6 @@ document.body.appendChild(renderer.domElement);
 const dpr = window.devicePixelRatio || 1; // Vérifie la densité de pixels de l'écran
 renderer.setPixelRatio(dpr);
 
-// Lumières
-const ambientLight = new THREE.AmbientLight(0x404040, 1); // Augmenter l'intensité
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Augmenter l'intensité
-directionalLight.position.set(10, 10, 10);
-scene.add(directionalLight);
-
-const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.6); // Légèrement plus faible mais présente
-directionalLight2.position.set(-10, -10, -10);
-scene.add(directionalLight2);
-
-// PointLight
-const pointLight = new THREE.PointLight(0xffffff, 1.2, 50); // Augmenter l'intensité
-pointLight.position.set(0, 5, 0); // Positionne la lumière au centre du plafond
-scene.add(pointLight);
-
-// CeilingLight (simule une lumière douce au plafond)
-const ceilingLight = new THREE.PointLight(0xffffff, 0.5, 100); // Augmenter légèrement l'intensité
-ceilingLight.position.set(0, 20, 0); // Positionne la lumière plus haut, comme un plafonnier
-scene.add(ceilingLight);
-
 // Charger le modèle gaming_desktop_pc
 const loader = new GLTFLoader();
 let pcModel, screenMesh;
@@ -66,7 +44,7 @@ loader.load('/assets/sofa.glb', (gltf) => {
 loader.load('/assets/table.glb', (gltf) => {
     const table = gltf.scene;
     table.scale.set(9, 9, 9); // Ajuste la taille selon tes besoins
-    table.position.set(8, -6.55, -9); // Positionne le canapé dans la scène
+    table.position.set(8, -6.55, -9); // Positionne dans la scène
     table.rotation.y = Math.PI; // Ajuste l'orientation si nécessaire
 
     scene.add(table);
@@ -75,7 +53,7 @@ loader.load('/assets/table.glb', (gltf) => {
 loader.load('/assets/plante1.glb', (gltf) => {
     const plante1 = gltf.scene;
     plante1.scale.set(9, 9, 9); // Ajuste la taille selon tes besoins
-    plante1.position.set(8, -3.29, -9); // Positionne le canapé dans la scène
+    plante1.position.set(8, -3.29, -9); // Positionne dans la scène
 
     scene.add(plante1);
 });
@@ -83,7 +61,7 @@ loader.load('/assets/plante1.glb', (gltf) => {
 loader.load('/assets/casque.glb', (gltf) => {
     const casque = gltf.scene;
     casque.scale.set(9, 9, 9); // Ajuste la taille selon tes besoins
-    casque.position.set(-7, -0.46, 2); // Positionne le canapé dans la scène
+    casque.position.set(-7, -0.46, 2); // Positionne dans la scène
     casque.rotation.set(Math.PI / 2.1, 0, 3); // Ajuste l'orientation si nécessaire
 
     scene.add(casque);
@@ -91,12 +69,125 @@ loader.load('/assets/casque.glb', (gltf) => {
 
 loader.load('/assets/lampe.glb', (gltf) => {
     const lampe = gltf.scene;
-    lampe.scale.set(0.8, 0.8, 0.8); // Ajuste la taille selon tes besoins
-    lampe.position.set(-7.6, -0.68, -1); // Positionne le canapé dans la scène
-    lampe.rotation.set(0, 4, 0); // Ajuste l'orientation si nécessaire
+    lampe.scale.set(0.8, 0.8, 0.8);
+    lampe.position.set(-7.6, -0.68, -1);
+    lampe.rotation.set(0, 4, 0);
 
     scene.add(lampe);
+
+    // Ajouter une lumière plus douce et diffuse
+    const lampeLight = new THREE.PointLight(0xffd700, 1, 8); // Lumière jaune plus large
+    lampeLight.position.set(-7.6, 3, -1);
+    lampeLight.decay = 2; // Réduction plus douce de l'intensité
+    lampeLight.castShadow = true;
+    lampeLight.shadow.mapSize.width = 1024;
+    lampeLight.shadow.mapSize.height = 1024;
+    scene.add(lampeLight);
+
+    // Ajouter une boule lumineuse au niveau de la source
+    const sphereGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+    const sphereMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffd700,
+        emissive: 0xffd700,
+        emissiveIntensity: 2
+    });
+    const lightSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    lightSphere.position.copy(lampeLight.position);
+    scene.add(lightSphere);
 });
+
+loader.load('/assets/cadre.glb', (gltf) => {
+    const cadre = gltf.scene;
+    cadre.scale.set(2, 2, 2); // Ajuste la taille selon tes besoins
+    cadre.position.set(-14, 1, -19.9); // Positionne dans la scène
+    cadre.rotation.set(0, 1.57, 0); // Ajuste l'orientation si nécessaire
+
+    scene.add(cadre);
+});
+
+loader.load('/assets/cadre.glb', (gltf) => {
+    const cadre = gltf.scene;
+    cadre.scale.set(2, 2, 2); // Ajuste la taille selon tes besoins
+    cadre.position.set(0, 1, -19.9); // Positionne dans la scène
+    cadre.rotation.set(0, 1.57, 0); // Ajuste l'orientation si nécessaire
+
+    scene.add(cadre);
+});
+
+loader.load('/assets/cadre.glb', (gltf) => {
+    const cadre = gltf.scene;
+    cadre.scale.set(2, 2, 2); // Ajuste la taille selon tes besoins
+    cadre.position.set(14, 1, -19.9); // Positionne dans la scène
+    cadre.rotation.set(0, 1.57, 0); // Ajuste l'orientation si nécessaire
+
+    scene.add(cadre);
+});
+
+loader.load('/assets/plafonnier.glb', (gltf) => {
+    const plafonnier = gltf.scene;
+    plafonnier.scale.set(4, 4, 4);
+    plafonnier.position.set(6, -8.2, 4);
+    plafonnier.rotation.set(0, 1.57, 0);
+
+    scene.add(plafonnier);
+
+    // Lumière principale plus puissante et positionnée pour un éclairage optimal
+    const plafonnierLight = new THREE.PointLight(0xffffff, 15, 80); // Intensité augmentée et portée plus large
+    plafonnierLight.position.set(-0.4, 10.5, 1.5);
+    plafonnierLight.castShadow = true; // Activer les ombres
+    plafonnierLight.shadow.mapSize.width = 8192; // Résolution des ombres améliorée
+    plafonnierLight.shadow.mapSize.height = 8192;
+    plafonnierLight.shadow.bias = -0.001; // Ajuster pour éviter les artefacts
+    plafonnierLight.shadow.camera.near = 1; // Ajuster les paramètres de la caméra des ombres
+    plafonnierLight.shadow.camera.far = 50;
+    plafonnierLight.shadow.camera.left = -20;
+    plafonnierLight.shadow.camera.right = 20;
+    plafonnierLight.shadow.camera.top = 20;
+    plafonnierLight.shadow.camera.bottom = -20;
+    scene.add(plafonnierLight);
+
+    // SpotLight directionnel plus focalisé
+    const spotLight = new THREE.SpotLight(0xffffff, 8, 60, Math.PI / 6, 0.3, 3);
+    spotLight.position.set(-0.4, 10.5, 1.5);
+    spotLight.target.position.set(-0.4, 10.5, 1.5); // Diriger vers le bureau
+    spotLight.castShadow = true;
+    spotLight.shadow.mapSize.width = 2048; // Réduire la taille des ombres pour plus de performance
+    spotLight.shadow.mapSize.height = 2048;
+    spotLight.shadow.bias = -0.005; // Prévenir les artefacts
+    scene.add(spotLight);
+    scene.add(spotLight.target);
+
+    // Lumière ambiante plus douce pour équilibrer
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Un peu plus forte pour contraster avec les ombres
+    scene.add(ambientLight);
+
+    // Augmenter la taille de la sphère émissive et ajuster l'intensité
+    const sphereGeometry = new THREE.SphereGeometry(1, 32, 32); // Augmenter la taille
+    const sphereMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffaa,
+        emissive: 0xffffaa,
+        emissiveIntensity: 5, // Intensité accrue pour plus d'effet lumineux
+        metalness: 0.1, // Surface légèrement métallique
+        roughness: 0.5  // Surface moins lisse pour un effet plus réaliste
+    });
+    const lightSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    lightSphere.position.copy(plafonnierLight.position);
+    scene.add(lightSphere);
+
+    // Ajouter des réflecteurs ou des surfaces pour l'éclairage supplémentaire si nécessaire
+    // Exemple d'un sol légèrement réfléchissant
+    const floorGeometry = new THREE.PlaneGeometry(100, 100);
+    const floorMaterial = new THREE.MeshStandardMaterial({
+        color: 0x555555,
+        roughness: 0.7,
+        metalness: 0.3
+    });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = - Math.PI / 2; // Placer le sol correctement
+    floor.position.y = -10;
+    scene.add(floor);
+});
+
 
 // Liste des images des projets
 const projectImages = [
