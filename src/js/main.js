@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as textureLoader from "three/addons/libs/opentype.module";
 
 // Initialisation de la scène
 const scene = new THREE.Scene();
@@ -36,6 +37,15 @@ loader.load('/assets/sofa.glb', (gltf) => {
     const sofa = gltf.scene;
     sofa.scale.set(6, 6, 6); // Ajuste la taille selon tes besoins
     sofa.position.set(16.5, -6.55, -9); // Positionne le canapé dans la scène
+    sofa.rotation.y = Math.PI; // Ajuste l'orientation si nécessaire
+
+    scene.add(sofa);
+});
+
+loader.load('/assets/plante2.glb', (gltf) => {
+    const sofa = gltf.scene;
+    sofa.scale.set(14, 14, 14); // Ajuste la taille selon tes besoins
+    sofa.position.set(17, -6.55, 1); // Positionne dans la scène
     sofa.rotation.y = Math.PI; // Ajuste l'orientation si nécessaire
 
     scene.add(sofa);
@@ -96,19 +106,51 @@ loader.load('/assets/lampe.glb', (gltf) => {
     scene.add(lightSphere);
 });
 
+loader.load('/assets/lampe.glb', (gltf) => {
+    const lampe = gltf.scene;
+    lampe.scale.set(3, 3, 3);
+    lampe.position.set(15, -6.3, 16);
+    lampe.rotation.set(0, 0.7, 0);
+
+    scene.add(lampe);
+
+    // Lumière d'ambiance plus neutre et douce
+    const ambientLight = new THREE.AmbientLight(0xffe4b5, 0.4); // Teinte beige clair, intensité réduite
+    scene.add(ambientLight);
+
+    // Lumière directionnelle plus douce et moins jaune
+    const directionalLight = new THREE.DirectionalLight(0xffe4b5, 0.3);
+    directionalLight.position.set(15, 12, 16);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 1024;
+    directionalLight.shadow.mapSize.height = 1024;
+
+    // Rendre la lumière plus diffuse
+    directionalLight.shadow.camera.left = -10;
+    directionalLight.shadow.camera.right = 10;
+    directionalLight.shadow.camera.top = 10;
+    directionalLight.shadow.camera.bottom = -10;
+
+    scene.add(directionalLight);
+
+    // Ajustement de la boule lumineuse avec une teinte plus neutre
+    const sphereGeometry = new THREE.SphereGeometry(1, 16, 16);
+    const sphereMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffe4b5,
+        emissive: 0xffe4b5,
+        emissiveIntensity: 1.0 // Moins intense
+    });
+    const lightSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    lightSphere.position.set(15, 7, 16);
+    scene.add(lightSphere);
+});
+
+
+
 loader.load('/assets/cadre.glb', (gltf) => {
     const cadre = gltf.scene;
     cadre.scale.set(2, 2, 2); // Ajuste la taille selon tes besoins
     cadre.position.set(-14, 1, -19.9); // Positionne dans la scène
-    cadre.rotation.set(0, 1.57, 0); // Ajuste l'orientation si nécessaire
-
-    scene.add(cadre);
-});
-
-loader.load('/assets/cadre.glb', (gltf) => {
-    const cadre = gltf.scene;
-    cadre.scale.set(2, 2, 2); // Ajuste la taille selon tes besoins
-    cadre.position.set(0, 1, -19.9); // Positionne dans la scène
     cadre.rotation.set(0, 1.57, 0); // Ajuste l'orientation si nécessaire
 
     scene.add(cadre);
@@ -122,6 +164,25 @@ loader.load('/assets/cadre.glb', (gltf) => {
 
     scene.add(cadre);
 });
+
+loader.load('/assets/window.glb', (gltf) => {
+    const window = gltf.scene;
+    window.scale.set(2, 2, 2); // Ajuste la taille selon tes besoins
+    window.position.set(2.1, 5, -19.75); // Positionne dans la scène
+    window.rotation.set(0, 0, 0); // Ajuste l'orientation si nécessaire
+
+    scene.add(window);
+});
+
+loader.load('/assets/window.glb', (gltf) => {
+    const window = gltf.scene;
+    window.scale.set(2, 2, 2); // Ajuste la taille selon tes besoins
+    window.position.set(-2.1, 5, -19.75); // Positionne dans la scène
+    window.rotation.set(0, 0, 0); // Ajuste l'orientation si nécessaire
+
+    scene.add(window);
+});
+
 
 loader.load('/assets/plafonnier.glb', (gltf) => {
     const plafonnier = gltf.scene;
@@ -334,68 +395,76 @@ window.addEventListener('keydown', (event) => {
 
 // Fonction pour créer la chambre avec des murs qui se touchent
 function createRoom() {
-    const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, side: THREE.DoubleSide });
+    const textureLoader = new THREE.TextureLoader();
 
-    // Charger la texture parquet.png pour le sol
-    const parquetTexture = new THREE.TextureLoader().load('/assets/textures/parquet.jpg', (texture) => {
-        texture.minFilter = THREE.LinearFilter; // Améliorer la qualité de la texture
-        texture.magFilter = THREE.LinearFilter;
-        texture.generateMipmaps = true; // Utiliser les mipmaps pour une meilleure qualité
+    // Charger la texture parquet pour le sol
+    const parquetTexture = textureLoader.load('/assets/textures/parquet.jpg', (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(4, 4); // Ajuster la répétition
     });
 
-    // Charger les textures pour les murs
-    const wallTexture = new THREE.TextureLoader().load('/assets/textures/mur4.jpg', (texture) => {
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        texture.generateMipmaps = true;
+    // Charger la texture des murs
+    const wallTexture = textureLoader.load('/assets/textures/PavingStones128_2K-JPG_Color.jpg', (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2, 2); // Ajuster la répétition
     });
 
-    // Sol (utilise la texture parquet)
-    const floorGeometry = new THREE.PlaneGeometry(40, 40); // Sol plus grand
+    // Création du matériau des murs
+    const wallMaterial = new THREE.MeshStandardMaterial({
+        map: wallTexture,
+        normalMap: textureLoader.load('/assets/textures/PavingStones128_2K-JPG_NormalGL.jpg'),
+        roughnessMap: textureLoader.load('/assets/textures/PavingStones128_2K-JPG_Roughness.jpg'),
+        aoMap: textureLoader.load('/assets/textures/PavingStones128_2K-JPG_AmbientOcclusion.jpg'),
+        side: THREE.DoubleSide,
+    });
+
+    // Sol
+    const floorGeometry = new THREE.PlaneGeometry(40, 40);
     const floorMaterial = new THREE.MeshStandardMaterial({ map: parquetTexture, side: THREE.DoubleSide });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = -Math.PI / 2; // Pour poser le sol horizontalement
+    floor.rotation.x = -Math.PI / 2;
     floor.position.set(0, -6.6, 0);
     scene.add(floor);
 
-    // Autres murs (ils peuvent rester tels quels, selon ton design)
-    // Murs (utilisation de BoxGeometry pour créer des murs)
-    const wallThickness = 0.5; // Augmenter l'épaisseur des murs
-    const wallHeight = 25; // Murs beaucoup plus grands
-    const wallWidth = 40; // Larges murs pour un grand espace
+    // Dimensions des murs
+    const wallThickness = 0.5;
+    const wallHeight = 25;
+    const wallWidth = 40;
 
-    // Mur arrière avec texture
+    // Mur arrière (derrière)
     const backWallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallThickness);
-    const backWall = new THREE.Mesh(backWallGeometry, new THREE.MeshStandardMaterial({ map: wallTexture }));
-    backWall.position.set(0, wallHeight / 6, -wallWidth / 2); // Positionner à la bonne distance
+    const backWall = new THREE.Mesh(backWallGeometry, wallMaterial);
+    backWall.position.set(0, wallHeight / 6, -wallWidth / 2);
     scene.add(backWall);
 
-    // Murs latéraux avec texture
+    // Murs latéraux
     const sideWallGeometry = new THREE.BoxGeometry(wallThickness, wallHeight, wallWidth);
 
-    // Mur gauche avec texture
-    const leftWall = new THREE.Mesh(sideWallGeometry, new THREE.MeshStandardMaterial({ map: wallTexture }));
-    leftWall.position.set(-wallWidth / 2, wallHeight / 6, 0); // Mur gauche juste au bord
+    const leftWall = new THREE.Mesh(sideWallGeometry, wallMaterial);
+    leftWall.position.set(-wallWidth / 2, wallHeight / 6, 0);
     scene.add(leftWall);
 
-    // Mur droit avec texture
-    const rightWall = new THREE.Mesh(sideWallGeometry, new THREE.MeshStandardMaterial({ map: wallTexture }));
-    rightWall.position.set(wallWidth / 2, wallHeight / 6, 0); // Mur droit juste au bord
+    const rightWall = new THREE.Mesh(sideWallGeometry, wallMaterial);
+    rightWall.position.set(wallWidth / 2, wallHeight / 6, 0);
     scene.add(rightWall);
 
+    // Plafond (inchangé)
     const ceilingGeometry = new THREE.PlaneGeometry(wallWidth, wallWidth);
-    const ceilingMaterial = new THREE.MeshStandardMaterial({map: wallTexture });
+    const ceilingMaterial = new THREE.MeshStandardMaterial({ map: wallTexture });
     const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
     ceiling.rotation.x = Math.PI / 2;
-    ceiling.position.set(0, wallHeight / 1.5, 0);
+    ceiling.position.set(0, wallHeight / 1.5, 0); // Position originale
     scene.add(ceiling);
 
-// Quatrième mur (devant)
+    // Mur avant (devant)
     const frontWallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallThickness);
-    const frontWall = new THREE.Mesh(frontWallGeometry, new THREE.MeshStandardMaterial({ map: wallTexture }));
+    const frontWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
     frontWall.position.set(0, wallHeight / 6, wallWidth / 2);
     scene.add(frontWall);
 }
+
 
 // Animation
 function animate() {
@@ -412,3 +481,4 @@ window.addEventListener("resize", () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
