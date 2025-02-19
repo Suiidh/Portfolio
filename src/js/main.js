@@ -145,42 +145,40 @@ loader.load('/assets/lampe.glb', (gltf) => {
     scene.add(lightSphere);
 });
 
+loader.load('/assets/wall2.glb', (gltf) => {
+    const wall = gltf.scene;
+    wall.scale.set(1.7, 1.7, 1.7); // Ajuste la taille selon tes besoins
+    wall.position.set(0, 2, -29.3); // Positionne dans la scène
+    wall.rotation.set(0, Math.PI/2, 0); // Ajuste l'orientation si nécessaire
 
-
-loader.load('/assets/cadre.glb', (gltf) => {
-    const cadre = gltf.scene;
-    cadre.scale.set(2, 2, 2); // Ajuste la taille selon tes besoins
-    cadre.position.set(-14, 1, -19.9); // Positionne dans la scène
-    cadre.rotation.set(0, 1.57, 0); // Ajuste l'orientation si nécessaire
-
-    scene.add(cadre);
+    scene.add(wall);
 });
 
-loader.load('/assets/cadre.glb', (gltf) => {
-    const cadre = gltf.scene;
-    cadre.scale.set(2, 2, 2); // Ajuste la taille selon tes besoins
-    cadre.position.set(14, 1, -19.9); // Positionne dans la scène
-    cadre.rotation.set(0, 1.57, 0); // Ajuste l'orientation si nécessaire
+loader.load('/assets/wall3.glb', (gltf) => {
+    const wall = gltf.scene;
+    wall.scale.set(1.7, 1.7, 1.7); // Ajuste la taille selon tes besoins
+    wall.position.set(0, 2, 10.8); // Positionne dans la scène
+    wall.rotation.set(0, Math.PI/2, 0); // Ajuste l'orientation si nécessaire
 
-    scene.add(cadre);
+    scene.add(wall);
 });
 
-loader.load('/assets/window.glb', (gltf) => {
-    const window = gltf.scene;
-    window.scale.set(2, 2, 2); // Ajuste la taille selon tes besoins
-    window.position.set(2.1, 5, -19.75); // Positionne dans la scène
-    window.rotation.set(0, 0, 0); // Ajuste l'orientation si nécessaire
+loader.load('/assets/wall3.glb', (gltf) => {
+    const wall = gltf.scene;
+    wall.scale.set(1.7, 1.7, 1.7); // Ajuste la taille selon tes besoins
+    wall.position.set(10.8, 2, 0); // Positionne dans la scène
+    wall.rotation.set(0, Math.PI, 0); // Ajuste l'orientation si nécessaire
 
-    scene.add(window);
+    scene.add(wall);
 });
 
-loader.load('/assets/window.glb', (gltf) => {
-    const window = gltf.scene;
-    window.scale.set(2, 2, 2); // Ajuste la taille selon tes besoins
-    window.position.set(-2.1, 5, -19.75); // Positionne dans la scène
-    window.rotation.set(0, 0, 0); // Ajuste l'orientation si nécessaire
+loader.load('/assets/wall3.glb', (gltf) => {
+    const wall = gltf.scene;
+    wall.scale.set(1.7, 1.7, 1.7); // Ajuste la taille selon tes besoins
+    wall.position.set(-29.5, 2, 0); // Positionne dans la scène
+    wall.rotation.set(0, Math.PI, 0); // Ajuste l'orientation si nécessaire
 
-    scene.add(window);
+    scene.add(wall);
 });
 
 
@@ -243,10 +241,6 @@ loader.load('/assets/plafonnier.glb', (gltf) => {
         roughness: 0.7,
         metalness: 0.3
     });
-    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = - Math.PI / 2; // Placer le sol correctement
-    floor.position.y = -10;
-    scene.add(floor);
 });
 
 
@@ -337,7 +331,7 @@ controls.maxPolarAngle = Math.PI / 2;
 controls.enableZoom = true;
 controls.zoomSpeed = 1.2;
 controls.minDistance = 3;
-controls.maxDistance = 200;
+controls.maxDistance = 100;
 
 // Gestion du zoom interactif
 let isZoomed = false;
@@ -433,23 +427,6 @@ function createRoom() {
     const wallHeight = 25;
     const wallWidth = 40;
 
-    // Mur arrière (derrière)
-    const backWallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallThickness);
-    const backWall = new THREE.Mesh(backWallGeometry, wallMaterial);
-    backWall.position.set(0, wallHeight / 6, -wallWidth / 2);
-    scene.add(backWall);
-
-    // Murs latéraux
-    const sideWallGeometry = new THREE.BoxGeometry(wallThickness, wallHeight, wallWidth);
-
-    const leftWall = new THREE.Mesh(sideWallGeometry, wallMaterial);
-    leftWall.position.set(-wallWidth / 2, wallHeight / 6, 0);
-    scene.add(leftWall);
-
-    const rightWall = new THREE.Mesh(sideWallGeometry, wallMaterial);
-    rightWall.position.set(wallWidth / 2, wallHeight / 6, 0);
-    scene.add(rightWall);
-
     // Plafond (inchangé)
     const ceilingGeometry = new THREE.PlaneGeometry(wallWidth, wallWidth);
     const ceilingMaterial = new THREE.MeshStandardMaterial({ map: wallTexture });
@@ -458,11 +435,16 @@ function createRoom() {
     ceiling.position.set(0, wallHeight / 1.5, 0); // Position originale
     scene.add(ceiling);
 
-    // Mur avant (devant)
-    const frontWallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallThickness);
-    const frontWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
-    frontWall.position.set(0, wallHeight / 6, wallWidth / 2);
-    scene.add(frontWall);
+    const backgroundTexture = textureLoader.load('/assets/paysage.png');
+
+    const planeGeometry = new THREE.PlaneGeometry(70, 50); // Taille ajustable
+    const planeMaterial = new THREE.MeshBasicMaterial({
+        map: backgroundTexture
+    });
+
+    const backgroundPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+    backgroundPlane.position.set(0, 10, -40); // Ajuste la position derrière ton mur
+    scene.add(backgroundPlane);
 }
 
 
