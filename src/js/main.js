@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import * as textureLoader from "three/addons/libs/opentype.module";
 
 // Initialisation de la scène
 const scene = new THREE.Scene();
@@ -36,7 +35,7 @@ loader.load('/assets/gaming_desktop_pc.glb', (gltf) => {
 loader.load('/assets/sofa.glb', (gltf) => {
     const sofa = gltf.scene;
     sofa.scale.set(6, 6, 6); // Ajuste la taille selon tes besoins
-    sofa.position.set(16.5, -6.55, -9); // Positionne le canapé dans la scène
+    sofa.position.set(16.5, -6.2, -9); // Positionne le canapé dans la scène
     sofa.rotation.y = Math.PI; // Ajuste l'orientation si nécessaire
 
     scene.add(sofa);
@@ -45,7 +44,7 @@ loader.load('/assets/sofa.glb', (gltf) => {
 loader.load('/assets/plante2.glb', (gltf) => {
     const sofa = gltf.scene;
     sofa.scale.set(14, 14, 14); // Ajuste la taille selon tes besoins
-    sofa.position.set(17, -6.55, 1); // Positionne dans la scène
+    sofa.position.set(17, -6.2, 1); // Positionne dans la scène
     sofa.rotation.y = Math.PI; // Ajuste l'orientation si nécessaire
 
     scene.add(sofa);
@@ -54,7 +53,7 @@ loader.load('/assets/plante2.glb', (gltf) => {
 loader.load('/assets/table.glb', (gltf) => {
     const table = gltf.scene;
     table.scale.set(9, 9, 9); // Ajuste la taille selon tes besoins
-    table.position.set(8, -6.55, -9); // Positionne dans la scène
+    table.position.set(8, -6.2, -9); // Positionne dans la scène
     table.rotation.y = Math.PI; // Ajuste l'orientation si nécessaire
 
     scene.add(table);
@@ -63,7 +62,7 @@ loader.load('/assets/table.glb', (gltf) => {
 loader.load('/assets/plante1.glb', (gltf) => {
     const plante1 = gltf.scene;
     plante1.scale.set(9, 9, 9); // Ajuste la taille selon tes besoins
-    plante1.position.set(8, -3.29, -9); // Positionne dans la scène
+    plante1.position.set(8, -2.94, -9); // Positionne dans la scène
 
     scene.add(plante1);
 });
@@ -119,7 +118,7 @@ loader.load('/assets/lampe.glb', (gltf) => {
     scene.add(ambientLight);
 
     // Lumière directionnelle plus douce et moins jaune
-    const directionalLight = new THREE.DirectionalLight(0xffe4b5, 0.3);
+    const directionalLight = new THREE.DirectionalLight(0xffe4b5, 1);
     directionalLight.position.set(15, 12, 16);
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.width = 1024;
@@ -181,11 +180,28 @@ loader.load('/assets/wall3.glb', (gltf) => {
     scene.add(wall);
 });
 
+loader.load('/assets/ceiling.glb', (gltf) => {
+    const ceiling = gltf.scene;
+    ceiling.scale.set(3, 3, 1.5); // Ajuste la taille selon tes besoins
+    ceiling.position.set(4, 33, 0); // Positionne dans la scène
+    ceiling.rotation.set(0, 0, Math.PI/2); // Ajuste l'orientation si nécessaire
+
+    scene.add(ceiling);
+});
+
+loader.load('/assets/floor.glb', (gltf) => {
+    const floor = gltf.scene;
+    floor.scale.set(3, 3, 1.5); // Ajuste la taille selon tes besoins
+    floor.position.set(4, 10, 0); // Positionne dans la scène
+    floor.rotation.set(0, 0, Math.PI/2); // Ajuste l'orientation si nécessaire
+
+    scene.add(floor);
+});
 
 loader.load('/assets/plafonnier.glb', (gltf) => {
     const plafonnier = gltf.scene;
     plafonnier.scale.set(4, 4, 4);
-    plafonnier.position.set(6, -8.2, 4);
+    plafonnier.position.set(6, -8.7, 4);
     plafonnier.rotation.set(0, 1.57, 0);
 
     scene.add(plafonnier);
@@ -391,49 +407,10 @@ window.addEventListener('keydown', (event) => {
 function createRoom() {
     const textureLoader = new THREE.TextureLoader();
 
-    // Charger la texture parquet pour le sol
-    const parquetTexture = textureLoader.load('/assets/textures/parquet.jpg', (texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(4, 4); // Ajuster la répétition
-    });
-
-    // Charger la texture des murs
-    const wallTexture = textureLoader.load('/assets/textures/PavingStones128_2K-JPG_Color.jpg', (texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(2, 2); // Ajuster la répétition
-    });
-
-    // Création du matériau des murs
-    const wallMaterial = new THREE.MeshStandardMaterial({
-        map: wallTexture,
-        normalMap: textureLoader.load('/assets/textures/PavingStones128_2K-JPG_NormalGL.jpg'),
-        roughnessMap: textureLoader.load('/assets/textures/PavingStones128_2K-JPG_Roughness.jpg'),
-        aoMap: textureLoader.load('/assets/textures/PavingStones128_2K-JPG_AmbientOcclusion.jpg'),
-        side: THREE.DoubleSide,
-    });
-
-    // Sol
-    const floorGeometry = new THREE.PlaneGeometry(40, 40);
-    const floorMaterial = new THREE.MeshStandardMaterial({ map: parquetTexture, side: THREE.DoubleSide });
-    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.set(0, -6.6, 0);
-    scene.add(floor);
-
     // Dimensions des murs
     const wallThickness = 0.5;
     const wallHeight = 25;
     const wallWidth = 40;
-
-    // Plafond (inchangé)
-    const ceilingGeometry = new THREE.PlaneGeometry(wallWidth, wallWidth);
-    const ceilingMaterial = new THREE.MeshStandardMaterial({ map: wallTexture });
-    const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
-    ceiling.rotation.x = Math.PI / 2;
-    ceiling.position.set(0, wallHeight / 1.5, 0); // Position originale
-    scene.add(ceiling);
 
     const backgroundTexture = textureLoader.load('/assets/paysage.png');
 
