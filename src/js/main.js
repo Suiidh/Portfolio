@@ -180,6 +180,15 @@ loader.load('/assets/wall3.glb', (gltf) => {
     scene.add(wall);
 });
 
+loader.load('/assets/door.glb', (gltf) => {
+    const door = gltf.scene;
+    door.scale.set(4, 4, 4); // Ajuste la taille selon tes besoins
+    door.position.set(0, 1.8, 19.7); // Positionne dans la scène
+    door.rotation.set(0, 0, 0); // Ajuste l'orientation si nécessaire
+
+    scene.add(door);
+});
+
 loader.load('/assets/ceiling.glb', (gltf) => {
     const ceiling = gltf.scene;
     ceiling.scale.set(3, 3, 1.5); // Ajuste la taille selon tes besoins
@@ -207,8 +216,8 @@ loader.load('/assets/plafonnier.glb', (gltf) => {
     scene.add(plafonnier);
 
     // Lumière principale plus puissante et positionnée pour un éclairage optimal
-    const plafonnierLight = new THREE.PointLight(0xffffff, 15, 80); // Intensité augmentée et portée plus large
-    plafonnierLight.position.set(-0.4, 10.5, 1.5);
+    const plafonnierLight = new THREE.PointLight(0xffffff, 200, 60); // Intensité augmentée et portée plus large
+    plafonnierLight.position.set(-0.4, 10, 1.5);
     plafonnierLight.castShadow = true; // Activer les ombres
     plafonnierLight.shadow.mapSize.width = 8192; // Résolution des ombres améliorée
     plafonnierLight.shadow.mapSize.height = 8192;
