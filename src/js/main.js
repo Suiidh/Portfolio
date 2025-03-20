@@ -5,8 +5,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // Ajout de la favicon
 const favicon = document.createElement('link');
 favicon.rel = 'icon';
-favicon.type = 'image/png'; // Change selon le format de ton image (ex. 'image/x-icon' pour .ico)
-favicon.href = '/assets/favicon.png'; // Chemin vers ton fichier favicon
+favicon.type = 'image/png';
+favicon.href = '/assets/favicon.png';
 document.head.appendChild(favicon);
 
 // Détection des capacités
@@ -14,11 +14,11 @@ const isHighPerf = !!document.createElement('canvas').getContext('webgl2') && wi
 const renderer = new THREE.WebGLRenderer({ antialias: isHighPerf, powerPreference: 'low-power' });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.shadowMap.enabled = isHighPerf; // Ombres uniquement sur machines puissantes
-renderer.shadowMap.type = THREE.BasicShadowMap; // Ombre légère
+renderer.shadowMap.enabled = isHighPerf;
+renderer.shadowMap.type = THREE.BasicShadowMap;
 document.body.appendChild(renderer.domElement);
 
-const dpr = Math.min(window.devicePixelRatio, isHighPerf ? 2 : 1); // 1 pour PC faibles
+const dpr = Math.min(window.devicePixelRatio, isHighPerf ? 2 : 1);
 renderer.setPixelRatio(dpr);
 
 const scene = new THREE.Scene();
@@ -60,9 +60,9 @@ loadingScreen.appendChild(gameContainer);
 loadingScreen.appendChild(progressBarContainer);
 document.body.appendChild(loadingScreen);
 
-// Tous les assets (rien enlevé !)
+// Tous les assets avec les sphères pour les lumières
 const assetsToLoad = [
-    { path: '/assets/gaming_desktop_pc.glb', callback: (gltf) => { pcModel = gltf.scene; pcModel.scale.set(1, 1, 1); pcModel.position.set(0, -1, 0); pcModel.rotation.y = -Math.PI / 2; scene.add(pcModel); camera.position.set(0, 5, 15); camera.lookAt(0, 4.5, 0); createScreen(-3, 2, -1.36); createRoom(); }},
+    { path: '/assets/gaming_desktop.glb', callback: (gltf) => { pcModel = gltf.scene; pcModel.scale.set(1, 1, 1); pcModel.position.set(0, -4.25, 0); pcModel.rotation.y = -Math.PI / 2; scene.add(pcModel); camera.position.set(0, 5, 15); camera.lookAt(0, 4.5, 0); createScreen(-3, 2, -1.36); createRoom(); }},
     { path: '/assets/sofa.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(6, 6, 6); m.position.set(16.5, -6.2, -9); m.rotation.y = Math.PI; scene.add(m); }},
     { path: '/assets/plante2.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(14, 14, 14); m.position.set(17, -6.2, 1); m.rotation.y = Math.PI; scene.add(m); }},
     { path: '/assets/table.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(9, 9, 9); m.position.set(8, -6.2, -9); m.rotation.y = Math.PI; scene.add(m); }},
@@ -79,11 +79,13 @@ const assetsToLoad = [
     { path: '/assets/lampe.glb', callback: (gltf) => {
             const m = gltf.scene; m.scale.set(0.8, 0.8, 0.8); m.position.set(-7.6, -0.68, -1); m.rotation.set(0, 4, 0); scene.add(m);
             const light = new THREE.PointLight(0xffd700, isHighPerf ? 1 : 0.5, 8); light.position.set(-7.6, 3, -1); scene.add(light);
+            const bulbGeometry = new THREE.SphereGeometry(0.2, 16, 16); const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 }); const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial); bulb.position.set(-7.6, 3, -1); scene.add(bulb);
         }},
     { path: '/assets/lampe.glb', callback: (gltf) => {
             const m = gltf.scene; m.scale.set(3, 3, 3); m.position.set(15, -5.95, 16); m.rotation.set(0, 0.7, 0); scene.add(m);
             const light = new THREE.DirectionalLight(0xffe4b5, isHighPerf ? 1 : 0.5); light.position.set(15, 12, 16); scene.add(light);
             const ambient = new THREE.AmbientLight(0xffe4b5, 0.3); scene.add(ambient);
+            const bulbGeometry = new THREE.SphereGeometry(0.8, 16, 16); const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffe4b5 }); const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial); bulb.position.set(15, 8, 16); scene.add(bulb);
         }},
     { path: '/assets/wall2.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(1.7, 1.7, 1.7); m.position.set(0, 2, -29.3); m.rotation.set(0, Math.PI / 2, 0); scene.add(m); }},
     { path: '/assets/wall3.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(1.7, 1.7, 1.7); m.position.set(0, 2, 10.8); m.rotation.set(0, Math.PI / 2, 0); scene.add(m); }},
@@ -96,6 +98,7 @@ const assetsToLoad = [
             const m = gltf.scene; m.scale.set(4, 4, 4); m.position.set(6, -8.7, 4); m.rotation.set(0, 1.57, 0); scene.add(m);
             const light = new THREE.PointLight(0xffffff, isHighPerf ? 100 : 50, 60); light.position.set(-0.4, 10, 1.5); scene.add(light);
             const ambient = new THREE.AmbientLight(0xffffff, 0.3); scene.add(ambient);
+            const bulbGeometry = new THREE.SphereGeometry(0.8, 16, 16); const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff }); const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial); bulb.position.set(-0.4, 11, 1.5); scene.add(bulb);
         }},
 ];
 
@@ -127,7 +130,7 @@ let lastTime = 0;
 function moveCactus(time) {
     if (!gameRunning) return;
     const delta = time - lastTime;
-    if (delta < (isHighPerf ? 16 : 33)) { // 60 FPS sur bon PC, 30 FPS sur faible
+    if (delta < (isHighPerf ? 16 : 33)) {
         requestAnimationFrame(moveCactus);
         return;
     }
@@ -175,14 +178,26 @@ window.addEventListener('keydown', (e) => {
         else if (isZoomedTV) toggleZoomTV();
     }
     else if (e.key === 'ArrowRight' && loadedCount >= assetsToLoad.length) {
-        currentProjectIndex = (currentProjectIndex + 1) % projectImages.length;
-        updateTVImage();
-        startTVSlideshow();
+        if (isZoomedPC) {
+            currentPCIndex = (currentPCIndex + 1) % pcImages.length;
+            updatePCImage();
+            startPCSlideshow();
+        } else {
+            currentTVIndex = (currentTVIndex + 1) % projectImages.length;
+            updateTVImage();
+            startTVSlideshow();
+        }
     }
     else if (e.key === 'ArrowLeft' && loadedCount >= assetsToLoad.length) {
-        currentProjectIndex = (currentProjectIndex - 1 + projectImages.length) % projectImages.length;
-        updateTVImage();
-        startTVSlideshow();
+        if (isZoomedPC) {
+            currentPCIndex = (currentPCIndex - 1 + pcImages.length) % pcImages.length;
+            updatePCImage();
+            startPCSlideshow();
+        } else {
+            currentTVIndex = (currentTVIndex - 1 + projectImages.length) % projectImages.length;
+            updateTVImage();
+            startTVSlideshow();
+        }
     }
 });
 
@@ -202,6 +217,7 @@ function loadNextAsset(index) {
         setTimeout(() => {
             document.body.removeChild(loadingScreen);
             loadingScreen.remove();
+            startPCSlideshow();
             startTVSlideshow();
             animate();
         }, 300);
@@ -227,16 +243,18 @@ loadNextAsset(0);
 
 // Textures et diaporama
 const projectImages = ['/assets/CV_Diapo/1.png', '/assets/CV_Diapo/2.png', '/assets/CV_Diapo/3.png', '/assets/CV_Diapo/4.png', '/assets/CV_Diapo/5.png', '/assets/CV_Diapo/6.png', '/assets/CV_Diapo/7.png', '/assets/CV_Diapo/8.png'];
-let currentProjectIndex = 0;
 const githubImage = '/assets/github.png';
+const pcImages = [...projectImages, githubImage];
+let currentPCIndex = 0;
+let currentTVIndex = 0;
 
 function createScreen(x, y, z) {
     const geometry = new THREE.PlaneGeometry(6.5, 3.6);
-    const texture = new THREE.TextureLoader().load(githubImage);
+    const texture = new THREE.TextureLoader().load(pcImages[currentPCIndex]);
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.encoding = THREE.sRGBEncoding;
-    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true, opacity: 1 });
     screenMesh = new THREE.Mesh(geometry, material);
     screenMesh.position.set(x, y, z);
     screenMesh.rotation.x = -Math.PI / 45;
@@ -247,7 +265,7 @@ function createScreen(x, y, z) {
 
 function createTVScreen(x, y, z) {
     const geometry = new THREE.PlaneGeometry(16.2, 7.8);
-    const texture = new THREE.TextureLoader().load(projectImages[currentProjectIndex]);
+    const texture = new THREE.TextureLoader().load(projectImages[currentTVIndex]);
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.encoding = THREE.sRGBEncoding;
@@ -258,13 +276,34 @@ function createTVScreen(x, y, z) {
     scene.add(tvMesh);
 }
 
+function updatePCImage() {
+    if (!screenMesh) return;
+    const fadeOut = setInterval(() => {
+        screenMesh.material.opacity -= 0.2;
+        if (screenMesh.material.opacity <= 0) {
+            clearInterval(fadeOut);
+            const newTexture = new THREE.TextureLoader().load(pcImages[currentPCIndex]);
+            newTexture.minFilter = THREE.LinearFilter;
+            newTexture.magFilter = THREE.LinearFilter;
+            newTexture.encoding = THREE.sRGBEncoding;
+            screenMesh.material.map.dispose();
+            screenMesh.material.map = newTexture;
+            screenMesh.material.needsUpdate = true;
+            const fadeIn = setInterval(() => {
+                screenMesh.material.opacity += 0.2;
+                if (screenMesh.material.opacity >= 1) clearInterval(fadeIn);
+            }, 50);
+        }
+    }, 50);
+}
+
 function updateTVImage() {
     if (!tvMesh) return;
     const fadeOut = setInterval(() => {
         tvMesh.material.opacity -= 0.2;
         if (tvMesh.material.opacity <= 0) {
             clearInterval(fadeOut);
-            const newTexture = new THREE.TextureLoader().load(projectImages[currentProjectIndex]);
+            const newTexture = new THREE.TextureLoader().load(projectImages[currentTVIndex]);
             newTexture.minFilter = THREE.LinearFilter;
             newTexture.magFilter = THREE.LinearFilter;
             newTexture.encoding = THREE.sRGBEncoding;
@@ -279,11 +318,19 @@ function updateTVImage() {
     }, 50);
 }
 
-let slideshowInterval;
+let pcSlideshowInterval, tvSlideshowInterval;
+function startPCSlideshow() {
+    clearInterval(pcSlideshowInterval);
+    pcSlideshowInterval = setInterval(() => {
+        currentPCIndex = (currentPCIndex + 1) % pcImages.length;
+        updatePCImage();
+    }, 5000);
+}
+
 function startTVSlideshow() {
-    clearInterval(slideshowInterval);
-    slideshowInterval = setInterval(() => {
-        currentProjectIndex = (currentProjectIndex + 1) % projectImages.length;
+    clearInterval(tvSlideshowInterval);
+    tvSlideshowInterval = setInterval(() => {
+        currentTVIndex = (currentTVIndex + 1) % projectImages.length;
         updateTVImage();
     }, 5000);
 }
@@ -296,7 +343,7 @@ controls.maxPolarAngle = Math.PI / 2;
 controls.enableZoom = true;
 controls.zoomSpeed = 0.8;
 controls.minDistance = 3;
-controls.maxDistance = isHighPerf ? 100 : 30;
+controls.maxDistance = 14;
 
 let isZoomedPC = false, isZoomedTV = false;
 const initialPositionPC = new THREE.Vector3(0, 5, 15);
@@ -347,10 +394,21 @@ window.addEventListener('click', (e) => {
     if (intersects.length > 0) {
         const obj = intersects[0].object;
         if (obj === screenMesh) {
-            if (!isZoomedPC) toggleZoomPC();
-            else window.open("https://github.com/Suiidh", "_blank");
-        } else if (obj === tvMesh) toggleZoomTV();
-    } else if (isZoomedPC) toggleZoomPC();
+            if (!isZoomedPC) {
+                toggleZoomPC();
+            } else {
+                if (pcImages[currentPCIndex] === githubImage) {
+                    window.open("https://github.com/Suiidh", "_blank");
+                } else {
+                    toggleZoomPC();
+                }
+            }
+        } else if (obj === tvMesh) {
+            toggleZoomTV();
+        }
+    } else if (isZoomedPC) {
+        toggleZoomPC();
+    }
 });
 
 function createRoom() {
