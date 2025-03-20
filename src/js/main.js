@@ -242,9 +242,18 @@ function loadNextAsset(index) {
 loadNextAsset(0);
 
 // Textures et diaporama
-const projectImages = ['/assets/CV_Diapo/1.png', '/assets/CV_Diapo/2.png', '/assets/CV_Diapo/3.png', '/assets/CV_Diapo/4.png', '/assets/CV_Diapo/5.png', '/assets/CV_Diapo/6.png', '/assets/CV_Diapo/7.png', '/assets/CV_Diapo/8.png'];
+const projectImages = [
+    '/assets/Projet1.png',
+    '/assets/Projet2.png',
+    '/assets/Projet3.png'
+];
+const projectLinks = {
+    '/assets/Projet1.png': 'https://emotionsgarden.vercel.app/',
+    '/assets/Projet2.png': 'https://github.com/Suiidh/TriApp',
+    '/assets/Projet3.png': 'https://github.com/Suiidh/movie-scope'
+};
 const githubImage = '/assets/github.png';
-const pcImages = [...projectImages, githubImage];
+const pcImages = ['/assets/CV_Diapo/1.png', '/assets/CV_Diapo/2.png', '/assets/CV_Diapo/3.png', '/assets/CV_Diapo/4.png', '/assets/CV_Diapo/5.png', '/assets/CV_Diapo/6.png', '/assets/CV_Diapo/7.png', '/assets/CV_Diapo/8.png', githubImage];
 let currentPCIndex = 0;
 let currentTVIndex = 0;
 
@@ -324,7 +333,7 @@ function startPCSlideshow() {
     pcSlideshowInterval = setInterval(() => {
         currentPCIndex = (currentPCIndex + 1) % pcImages.length;
         updatePCImage();
-    }, 5000);
+    }, 10000);
 }
 
 function startTVSlideshow() {
@@ -332,7 +341,7 @@ function startTVSlideshow() {
     tvSlideshowInterval = setInterval(() => {
         currentTVIndex = (currentTVIndex + 1) % projectImages.length;
         updateTVImage();
-    }, 5000);
+    }, 10000);
 }
 
 // Contrôles
@@ -404,10 +413,20 @@ window.addEventListener('click', (e) => {
                 }
             }
         } else if (obj === tvMesh) {
-            toggleZoomTV();
+            if (!isZoomedTV) {
+                toggleZoomTV();
+            } else {
+                const currentImage = projectImages[currentTVIndex];
+                const link = projectLinks[currentImage];
+                if (link) {
+                    window.open(link, "_blank");
+                }
+            }
         }
     } else if (isZoomedPC) {
         toggleZoomPC();
+    } else if (isZoomedTV) {
+        toggleZoomTV();
     }
 });
 
