@@ -24,7 +24,7 @@ renderer.setPixelRatio(dpr);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, isHighPerf ? 100 : 50);
 
-// Écran de chargement
+// Écran de chargement (sans mini-jeu)
 const loadingScreen = document.createElement('div');
 loadingScreen.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; font-family: Arial, sans-serif;';
 
@@ -33,21 +33,141 @@ loadingText.style.cssText = 'font-size: 24px; margin-bottom: 20px; animation: pu
 
 const styleSheet = document.createElement('style');
 styleSheet.innerHTML = `
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
-    #gameContainer { width: 400px; height: 150px; position: relative; background: #222; overflow: hidden; }
-    #dino { width: 30px; height: 30px; background: #fff; position: absolute; bottom: 0; left: 40px; transition: bottom 0.2s; }
-    #cactus { width: 15px; height: 30px; background: #0f0; position: absolute; bottom: 0; right: -15px; }
+    @keyframes modalFadeIn { 
+        from { opacity: 0; transform: scale(0.95); } 
+        to { opacity: 1; transform: scale(1); } 
+    }
+    #infoButton { 
+        position: fixed; 
+        top: 15px; 
+        right: 15px; 
+        padding: 10px 20px; 
+        background: linear-gradient(135deg, #1e90ff, #00bfff); 
+        color: #fff; 
+        border: none; 
+        border-radius: 25px; 
+        cursor: pointer; 
+        font-size: 16px; 
+        font-family: 'Poppins', sans-serif; 
+        font-weight: 600; 
+        z-index: 1000; 
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); 
+        transition: transform 0.2s, background 0.3s; 
+    }
+    #infoButton:hover { 
+        background: linear-gradient(135deg, #00bfff, #1e90ff); 
+        transform: scale(1.05); 
+    }
+    #infoModal { 
+        display: none; 
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 100%; 
+        background: rgba(0, 0, 0, 0.75); 
+        z-index: 2000; 
+        justify-content: center; 
+        align-items: center; 
+    }
+    #infoModalContent { 
+        background: linear-gradient(135deg, #ffffff, #f0f4f8); 
+        padding: 25px; 
+        border-radius: 15px; 
+        max-width: 900px; 
+        width: 90%; 
+        height: 500px; 
+        position: relative; 
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+        font-family: 'Poppins', sans-serif; 
+        animation: modalFadeIn 0.3s ease-out; 
+        display: flex; 
+        flex-direction: column; 
+        flex-wrap: wrap; 
+        gap: 20px; 
+    }
+    #infoModalContent h2 { 
+        margin: 0 0 15px; 
+        color: #1e90ff; 
+        font-size: 24px; 
+        font-weight: 600; 
+        text-align: center; 
+        border-bottom: 2px solid #1e90ff; 
+        padding-bottom: 10px; 
+        width: 100%; 
+    }
+    #infoModalContent .content-wrapper { 
+        display: flex; 
+        flex-direction: row; 
+        flex: 1; 
+        width: 100%; 
+        height: calc(100% - 60px); 
+    }
+    #infoModalContent .section { 
+        flex: 1; 
+        padding: 0 15px; 
+    }
+    #infoModalContent h3 { 
+        color: #333; 
+        font-size: 18px; 
+        font-weight: 600; 
+        margin: 0 0 10px; 
+        text-align: center; 
+    }
+    #infoModalContent ul { 
+        list-style: none; 
+        padding: 0; 
+        margin: 0; 
+    }
+    #infoModalContent ul li { 
+        margin: 8px 0; 
+        color: #555; 
+        font-size: 14px; 
+        position: relative; 
+        padding-left: 20px; 
+    }
+    #infoModalContent ul li:before { 
+        content: '•'; 
+        position: absolute; 
+        left: 0; 
+        color: #1e90ff; 
+        font-size: 16px; 
+        line-height: 14px; 
+    }
+    #infoModalContent a { 
+        color: #1e90ff; 
+        text-decoration: none; 
+        transition: color 0.2s; 
+    }
+    #infoModalContent a:hover { 
+        color: #00bfff; 
+        text-decoration: underline; 
+    }
+    #closeModal { 
+        position: absolute; 
+        top: 15px; 
+        right: 15px; 
+        background: #ff4444; 
+        color: #fff; 
+        border: none; 
+        border-radius: 50%; 
+        width: 30px; 
+        height: 30px; 
+        cursor: pointer; 
+        font-size: 20px; 
+        line-height: 30px; 
+        text-align: center; 
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
+        transition: background 0.3s, transform 0.2s; 
+    }
+    #closeModal:hover { 
+        background: #cc0000; 
+        transform: scale(1.1); 
+    }
 `;
 document.head.appendChild(styleSheet);
-
-const gameContainer = document.createElement('div');
-gameContainer.id = 'gameContainer';
-const dino = document.createElement('div');
-dino.id = 'dino';
-const cactus = document.createElement('div');
-cactus.id = 'cactus';
-gameContainer.appendChild(dino);
-gameContainer.appendChild(cactus);
 
 const progressBarContainer = document.createElement('div');
 progressBarContainer.style.cssText = 'width: 50%; height: 10px; background: #333; border-radius: 5px; overflow: hidden; margin-top: 10px;';
@@ -56,11 +176,11 @@ progressBar.style.cssText = 'width: 0%; height: 100%; background: #0f0; transiti
 
 progressBarContainer.appendChild(progressBar);
 loadingScreen.appendChild(loadingText);
-loadingScreen.appendChild(gameContainer);
 loadingScreen.appendChild(progressBarContainer);
 document.body.appendChild(loadingScreen);
 
 // Tous les assets avec les sphères pour les lumières
+let ps5Model;
 const assetsToLoad = [
     { path: '/assets/gaming_desktop.glb', callback: (gltf) => { pcModel = gltf.scene; pcModel.scale.set(1, 1, 1); pcModel.position.set(0, -4.25, 0); pcModel.rotation.y = -Math.PI / 2; scene.add(pcModel); camera.position.set(0, 5, 15); camera.lookAt(0, 4.5, 0); createScreen(-3, 2, -1.36); createRoom(); }},
     { path: '/assets/sofa.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(6, 6, 6); m.position.set(16.5, -6.2, -9); m.rotation.y = Math.PI; scene.add(m); }},
@@ -69,8 +189,9 @@ const assetsToLoad = [
     { path: '/assets/plante1.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(9, 9, 9); m.position.set(8, -2.94, -9); scene.add(m); }},
     { path: '/assets/casque.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(9, 9, 9); m.position.set(-7, -0.46, 2); m.rotation.set(Math.PI / 2.1, 0, 3); scene.add(m); }},
     { path: '/assets/chair.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(8, 8, 8); m.position.set(-2, -6.1, 5); m.rotation.set(0, Math.PI / 2, 0); scene.add(m); }},
-    { path: '/assets/tv.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(4, 4, 4); m.position.set(-19.14, 0, -9); m.rotation.y = 0; scene.add(m); createTVScreen(-19.2, 5.5, -8.9); }},
+    { path: '/assets/tv.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(4, 4, 4); m.position.set(-19.14, 1, -9); m.rotation.y = 0; scene.add(m); createTVScreen(-19.2, 5.5, -8.9); }},
     { path: '/assets/tv_stand4.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(8, 8, 8); m.position.set(-18.3, -6.2, -9); m.rotation.set(0, -Math.PI / 2, 0); scene.add(m); }},
+    { path: '/assets/ps5.glb', callback: (gltf) => { ps5Model = gltf.scene; ps5Model.scale.set(0.8, 0.8, 0.8); ps5Model.position.set(-18.3, 0.5, -4); ps5Model.rotation.set(0, -Math.PI / 2, 0); scene.add(ps5Model); }},
     { path: '/assets/tv_stand3.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(8, 8, 8); m.position.set(-18.3, 1, 15); m.rotation.set(0, -Math.PI / 2, Math.PI / 2); scene.add(m); }},
     { path: '/assets/spider-man.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(0.5, 0.5, 0.5); m.position.set(-18.3, 3.55, 11); m.rotation.set(0, Math.PI / 2.7, 0); scene.add(m); }},
     { path: '/assets/venom.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(1, 1, 1); m.position.set(-18.3, 3.5, 13.5); m.rotation.set(0, Math.PI / 1.7, 0); scene.add(m); }},
@@ -102,82 +223,169 @@ const assetsToLoad = [
         }},
 ];
 
-// Mini-jeu
-let isJumping = false;
-let gameRunning = true;
-let cactusPosition = 400;
-let score = 0;
-let highScore = localStorage.getItem('dinoHighScore') ? parseInt(localStorage.getItem('dinoHighScore')) : 0;
+// Chargement (sans mini-jeu)
 let loadedCount = 0;
 
 function updateLoadingText() {
-    loadingText.textContent = `Chargement... ${Math.round(loadedCount / assetsToLoad.length * 100)}% | Score: ${score} | Record: ${highScore}`;
+    loadingText.textContent = `Chargement... ${Math.round(loadedCount / assetsToLoad.length * 100)}%`;
 }
 updateLoadingText();
 
-function jump() {
-    if (!isJumping && gameRunning) {
-        isJumping = true;
-        dino.style.bottom = '60px';
-        setTimeout(() => {
-            dino.style.bottom = '0px';
-            isJumping = false;
-        }, 300);
+// Mini-jeu sur la TV avec difficulté croissante et pièces
+let tvIsJumping = false;
+let tvGameRunning = false;
+let tvCactusPosition = 800;
+let tvScore = 0;
+let tvHighScore = localStorage.getItem('tvDinoHighScore') ? parseInt(localStorage.getItem('tvDinoHighScore')) : 0;
+let tvCoins = 0; // Compteur de pièces
+let tvGameCanvas, tvGameContext, tvDino, tvCactus, tvCoin;
+let jumpStartTime = 0;
+const jumpDuration = 700;
+
+function startTVGame() {
+    if (tvGameRunning) return;
+    tvGameRunning = true;
+    tvCactusPosition = 800;
+    tvScore = 0;
+    tvCoins = 0;
+
+    tvGameCanvas = document.createElement('canvas');
+    tvGameCanvas.width = 800;
+    tvGameCanvas.height = 400;
+    tvGameContext = tvGameCanvas.getContext('2d');
+
+    tvDino = { x: 50, y: 375, width: 25, height: 25, jumping: false, velocity: 0 }; // Sol à 400px
+    tvCactus = { x: 800, y: 350, width: 20, height: 50 };
+    tvCoin = null; // Pièce initialement absente
+
+    const texture = new THREE.CanvasTexture(tvGameCanvas);
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    tvMesh.material.map = texture;
+    tvMesh.material.needsUpdate = true;
+
+    animateTVGame();
+}
+
+function stopTVGame() {
+    tvGameRunning = false;
+    tvMesh.material.map = new THREE.TextureLoader().load(projectImages[currentTVIndex]);
+    tvMesh.material.needsUpdate = true;
+}
+
+function tvJump() {
+    if (!tvIsJumping && tvGameRunning) {
+        tvIsJumping = true;
+        tvDino.jumping = true;
+        jumpStartTime = performance.now();
     }
 }
 
-let lastTime = 0;
-function moveCactus(time) {
-    if (!gameRunning) return;
-    const delta = time - lastTime;
-    if (delta < (isHighPerf ? 16 : 33)) {
-        requestAnimationFrame(moveCactus);
-        return;
+function spawnCoin() {
+    if (!tvCoin && Math.random() < 0.02) { // 2% de chance par frame de générer une pièce
+        tvCoin = {
+            x: 800,
+            y: Math.random() * (375 - 275) + 275, // Entre 275 (sommet du saut) et 375 (sol)
+            width: 15,
+            height: 15
+        };
     }
-    lastTime = time;
+}
 
-    cactusPosition -= 3;
-    cactus.style.right = `${400 - cactusPosition}px`;
+function animateTVGame() {
+    if (!tvGameRunning) return;
 
-    const dinoRect = dino.getBoundingClientRect();
-    const cactusRect = cactus.getBoundingClientRect();
-    if (dinoRect.right > cactusRect.left && dinoRect.left < cactusRect.right && dinoRect.bottom > cactusRect.top) {
-        gameRunning = false;
-        if (score > highScore) {
-            highScore = score;
-            localStorage.setItem('dinoHighScore', highScore);
+    const currentTime = performance.now();
+    const speed = 5 + tvScore * 0.1; // Vitesse augmente avec le score
+    tvCactusPosition -= speed;
+
+    if (tvCactusPosition <= -25) {
+        tvCactusPosition = 800;
+        tvScore++;
+    }
+
+    // Gestion du saut
+    if (tvIsJumping) {
+        const elapsed = currentTime - jumpStartTime;
+        const progress = Math.min(elapsed / jumpDuration, 1);
+        const height = 100 * Math.sin(progress * Math.PI);
+        tvDino.y = 375 - height;
+
+        if (progress >= 1) {
+            tvDino.y = 375;
+            tvIsJumping = false;
+            tvDino.jumping = false;
         }
-        loadingText.textContent = `Perdu ! Score: ${score} | Record: ${highScore} | Espace ou Échap pour rejouer`;
     }
 
-    if (cactusPosition <= -15) {
-        cactusPosition = 400;
-        score++;
-        updateLoadingText();
+    // Gestion des pièces
+    spawnCoin();
+    if (tvCoin) {
+        tvCoin.x -= speed;
+        if (tvCoin.x < -15) {
+            tvCoin = null; // Supprime la pièce si elle sort de l'écran
+        } else if (
+            tvDino.x + tvDino.width > tvCoin.x &&
+            tvDino.x < tvCoin.x + tvCoin.width &&
+            tvDino.y + tvDino.height > tvCoin.y &&
+            tvDino.y < tvCoin.y + tvCoin.height
+        ) {
+            tvCoins++;
+            tvCoin = null; // Pièce collectée
+        }
     }
-    requestAnimationFrame(moveCactus);
+
+    // Rendu
+    tvGameContext.clearRect(0, 0, 800, 400);
+    tvGameContext.fillStyle = '#222';
+    tvGameContext.fillRect(0, 0, 800, 400);
+
+    // Dino
+    tvGameContext.fillStyle = '#fff';
+    tvGameContext.fillRect(tvDino.x, tvDino.y, tvDino.width, tvDino.height);
+
+    // Cactus
+    tvGameContext.fillStyle = '#0f0';
+    tvGameContext.fillRect(tvCactusPosition, tvCactus.y, tvCactus.width, tvCactus.height);
+
+    // Pièce
+    if (tvCoin) {
+        tvGameContext.fillStyle = '#ffd700'; // Or pour les pièces
+        tvGameContext.beginPath();
+        tvGameContext.arc(tvCoin.x + tvCoin.width / 2, tvCoin.y + tvCoin.height / 2, tvCoin.width / 2, 0, Math.PI * 2);
+        tvGameContext.fill();
+    }
+
+    // Texte
+    tvGameContext.fillStyle = '#fff';
+    tvGameContext.font = '20px Arial';
+    tvGameContext.fillText(`Score: ${tvScore} | Record: ${tvHighScore} | Pièces: ${tvCoins}`, 10, 30);
+
+    // Collision avec cactus
+    if (tvDino.x + tvDino.width > tvCactusPosition && tvDino.x < tvCactusPosition + tvCactus.width && tvDino.y + tvDino.height > tvCactus.y) {
+        tvGameRunning = false;
+        if (tvScore > tvHighScore) {
+            tvHighScore = tvScore;
+            localStorage.setItem('tvDinoHighScore', tvHighScore);
+        }
+        tvGameContext.fillText(`Perdu ! Score: ${tvScore} | Record: ${tvHighScore} | Pièces: ${tvCoins}`, 300, 200);
+        setTimeout(stopTVGame, 2000);
+    } else {
+        requestAnimationFrame(animateTVGame);
+    }
+
+    tvMesh.material.map.needsUpdate = true;
 }
-requestAnimationFrame(moveCactus);
 
-function resetGame() {
-    if (!gameRunning && loadedCount < assetsToLoad.length) {
-        gameRunning = true;
-        cactusPosition = 400;
-        cactus.style.right = '-15px';
-        score = 0;
-        updateLoadingText();
-        requestAnimationFrame(moveCactus);
-    }
-}
-
+// Gestion des événements
 window.addEventListener('keydown', (e) => {
-    if (e.key === ' ' && gameRunning) jump();
-    else if ((e.key === ' ' || e.key === 'Escape') && !gameRunning && loadedCount < assetsToLoad.length) resetGame();
-    else if (e.key === 'Escape' && loadedCount >= assetsToLoad.length) {
+    if (e.key === 'Escape' && loadedCount >= assetsToLoad.length) {
         if (isZoomedPC) toggleZoomPC();
-        else if (isZoomedTV) toggleZoomTV();
-    }
-    else if (e.key === 'ArrowRight' && loadedCount >= assetsToLoad.length) {
+        else if (isZoomedTV) {
+            stopTVGame();
+            toggleZoomTV();
+        }
+    } else if (e.key === 'ArrowRight' && loadedCount >= assetsToLoad.length && !tvGameRunning) {
         if (isZoomedPC) {
             currentPCIndex = (currentPCIndex + 1) % pcImages.length;
             updatePCImage();
@@ -187,8 +395,7 @@ window.addEventListener('keydown', (e) => {
             updateTVImage();
             startTVSlideshow();
         }
-    }
-    else if (e.key === 'ArrowLeft' && loadedCount >= assetsToLoad.length) {
+    } else if (e.key === 'ArrowLeft' && loadedCount >= assetsToLoad.length && !tvGameRunning) {
         if (isZoomedPC) {
             currentPCIndex = (currentPCIndex - 1 + pcImages.length) % pcImages.length;
             updatePCImage();
@@ -198,7 +405,7 @@ window.addEventListener('keydown', (e) => {
             updateTVImage();
             startTVSlideshow();
         }
-    }
+    } else if (e.key === ' ' && tvGameRunning) tvJump();
 });
 
 // Chargement
@@ -209,11 +416,6 @@ function loadNextAsset(index) {
     if (index >= assetsToLoad.length) {
         loadingText.textContent = 'Chargement terminé !';
         progressBar.style.width = '100%';
-        gameRunning = false;
-        if (score > highScore) {
-            highScore = score;
-            localStorage.setItem('dinoHighScore', highScore);
-        }
         setTimeout(() => {
             document.body.removeChild(loadingScreen);
             loadingScreen.remove();
@@ -280,7 +482,7 @@ function createTVScreen(x, y, z) {
     texture.encoding = THREE.sRGBEncoding;
     const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true, opacity: 1 });
     tvMesh = new THREE.Mesh(geometry, material);
-    tvMesh.position.set(-19.2, 5.5, -8.9);
+    tvMesh.position.set(-19.2, 6.5, -8.9);
     tvMesh.rotation.y = Math.PI / 2;
     scene.add(tvMesh);
 }
@@ -307,7 +509,7 @@ function updatePCImage() {
 }
 
 function updateTVImage() {
-    if (!tvMesh) return;
+    if (!tvMesh || tvGameRunning) return;
     const fadeOut = setInterval(() => {
         tvMesh.material.opacity -= 0.2;
         if (tvMesh.material.opacity <= 0) {
@@ -357,7 +559,7 @@ controls.maxDistance = 14;
 let isZoomedPC = false, isZoomedTV = false;
 const initialPositionPC = new THREE.Vector3(0, 5, 15);
 const zoomedPositionPC = new THREE.Vector3(-3, 2.4, 1);
-const zoomedPositionTV = new THREE.Vector3(-11.62, 5.69, -8.96);
+const zoomedPositionTV = new THREE.Vector3(-11.62, 6.69, -8.96);
 const zoomedRotationTV = new THREE.Euler(-108.29 * Math.PI / 180, 88.52 * Math.PI / 180, 108.29 * Math.PI / 180);
 
 function animateZoom(targetPosition, targetRotation, targetFocus) {
@@ -391,6 +593,77 @@ function toggleZoomTV() {
     animateZoom(isZoomedTV ? zoomedPositionTV : initialPositionPC, isZoomedTV ? zoomedRotationTV : new THREE.Euler(0, 0, 0), isZoomedTV ? tvMesh.position : screenMesh.position);
 }
 
+// Fonction pour vérifier si un objet est un enfant de ps5Model
+function isChildOfPs5Model(obj) {
+    let current = obj;
+    while (current) {
+        if (current === ps5Model) return true;
+        current = current.parent;
+    }
+    return false;
+}
+
+// Bouton Info et Modale
+const infoButton = document.createElement('button');
+infoButton.id = 'infoButton';
+infoButton.textContent = 'Info';
+document.body.appendChild(infoButton);
+
+const infoModal = document.createElement('div');
+infoModal.id = 'infoModal';
+const infoModalContent = document.createElement('div');
+infoModalContent.id = 'infoModalContent';
+infoModalContent.innerHTML = `
+    <h2>Informations sur les modèles</h2>
+    <div class="content-wrapper">
+        <div class="section">
+            <h3>Modèles créés par moi</h3>
+            <ul>
+                <li>TV (tv.glb)</li>
+                <li>Meuble TV principal (tv_stand4.glb)</li>
+                <li>Vitrine (tv_stand3.glb)</li>
+                <li>Murs (wall2.glb, wall3.glb)</li>
+                <li>Sol (floor.glb)</li>
+                <li>Plafond (ceiling.glb)</li>
+                <li>Porte (door.glb)</li>
+                <li>Plafonnier (plafonnier.glb)</li>
+                <li>Lampes (lampe.glb)</li>
+                <li>Fenêtres (window.glb)</li>
+                <li>Cadres (cadre.glb)</li>
+            </ul>
+        </div>
+        <div class="section">
+            <h3>Modèles non créés par moi</h3>
+            <ul>
+                <li>"Sony PS5 DualSense Controller" par <a href="https://sketchfab.com/JayakrishnanMarath" target="_blank">Jayakrishnan Marath</a>, sous licence Creative Commons Attribution.</li>
+                <li>"Ps5" par <a href="https://sketchfab.com/Voshi" target="_blank">Voshi</a>, sous licence Creative Commons Attribution.</li>
+                <li>Bureau gaming (gaming_desktop.glb)</li>
+                <li>Canapé (sofa.glb)</li>
+                <li>Plantes (plante1.glb, plante2.glb)</li>
+                <li>Table (table.glb)</li>
+                <li>Casque (casque.glb)</li>
+                <li>Chaise (chair.glb)</li>
+                <li>Figurines : Spider-Man (spider-man.glb), Venom (venom.glb), Batman (batman.glb), Iron Man (iron_man.glb)</li>
+            </ul>
+        </div>
+    </div>
+`;
+const closeModalButton = document.createElement('button');
+closeModalButton.id = 'closeModal';
+closeModalButton.textContent = '×';
+infoModalContent.appendChild(closeModalButton);
+infoModal.appendChild(infoModalContent);
+document.body.appendChild(infoModal);
+
+// Gestion des événements pour le bouton et la modale
+infoButton.addEventListener('click', () => {
+    infoModal.style.display = 'flex';
+});
+
+closeModalButton.addEventListener('click', () => {
+    infoModal.style.display = 'none';
+});
+
 // Interaction
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -399,10 +672,18 @@ window.addEventListener('click', (e) => {
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects([screenMesh, tvMesh]);
+
+    const intersects = raycaster.intersectObjects(scene.children, true);
+
     if (intersects.length > 0) {
         const obj = intersects[0].object;
-        if (obj === screenMesh) {
+
+        if (ps5Model && isChildOfPs5Model(obj)) {
+            if (!isZoomedTV) {
+                toggleZoomTV();
+                startTVGame();
+            }
+        } else if (obj === screenMesh) {
             if (!isZoomedPC) {
                 toggleZoomPC();
             } else {
@@ -415,17 +696,21 @@ window.addEventListener('click', (e) => {
         } else if (obj === tvMesh) {
             if (!isZoomedTV) {
                 toggleZoomTV();
-            } else {
+            } else if (!tvGameRunning) {
                 const currentImage = projectImages[currentTVIndex];
                 const link = projectLinks[currentImage];
                 if (link) {
                     window.open(link, "_blank");
                 }
             }
+        } else if (isZoomedTV) {
+            stopTVGame();
+            toggleZoomTV();
         }
     } else if (isZoomedPC) {
         toggleZoomPC();
     } else if (isZoomedTV) {
+        stopTVGame();
         toggleZoomTV();
     }
 });
