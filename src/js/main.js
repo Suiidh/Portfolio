@@ -182,7 +182,18 @@ document.body.appendChild(loadingScreen);
 // Tous les assets avec les sphères pour les lumières
 let ps5Model;
 const assetsToLoad = [
-    { path: '/assets/gaming_desktop.glb', callback: (gltf) => { pcModel = gltf.scene; pcModel.scale.set(1, 1, 1); pcModel.position.set(0, -4.25, 0); pcModel.rotation.y = -Math.PI / 2; scene.add(pcModel); camera.position.set(0, 5, 15); camera.lookAt(0, 4.5, 0); createScreen(-3, 2, -1.36); createRoom(); }},
+    { path: '/assets/gaming_desktop.glb', callback: (gltf) => {
+            pcModel = gltf.scene;
+            pcModel.scale.set(1, 1, 1);
+            pcModel.position.set(0, -4.25, 0);
+            pcModel.rotation.y = -Math.PI / 2;
+            scene.add(pcModel);
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 4.5, 0);
+            createScreen(-3, 2, -1.36);
+            createRoom();
+            createDiplomaScreen();
+        }},
     { path: '/assets/sofa.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(6, 6, 6); m.position.set(16.5, -6.2, -9); m.rotation.y = Math.PI; scene.add(m); }},
     { path: '/assets/plante2.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(14, 14, 14); m.position.set(17, -6.2, 1); m.rotation.y = Math.PI; scene.add(m); }},
     { path: '/assets/table.glb', callback: (gltf) => { const m = gltf.scene; m.scale.set(9, 9, 9); m.position.set(8, -6.2, -9); m.rotation.y = Math.PI; scene.add(m); }},
@@ -384,7 +395,7 @@ window.addEventListener('keydown', (e) => {
         else if (isZoomedTV) {
             stopTVGame();
             toggleZoomTV();
-        }
+        } else if (isZoomedDiploma) toggleZoomDiploma();
     } else if (e.key === 'ArrowRight' && loadedCount >= assetsToLoad.length && !tvGameRunning) {
         if (isZoomedPC) {
             currentPCIndex = (currentPCIndex + 1) % pcImages.length;
@@ -410,7 +421,7 @@ window.addEventListener('keydown', (e) => {
 
 // Chargement
 const loader = new GLTFLoader();
-let pcModel, screenMesh, tvMesh;
+let pcModel, screenMesh, tvMesh, diplomaMesh;
 
 function loadNextAsset(index) {
     if (index >= assetsToLoad.length) {
@@ -487,6 +498,19 @@ function createTVScreen(x, y, z) {
     scene.add(tvMesh);
 }
 
+function createDiplomaScreen() {
+    const geometry = new THREE.PlaneGeometry(4.3, 2.6); // Taille que tu avais choisie
+    const texture = new THREE.TextureLoader().load('/assets/BTS.png'); // Chemin vers ton image
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.encoding = THREE.sRGBEncoding;
+    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true, opacity: 1 });
+    diplomaMesh = new THREE.Mesh(geometry, material);
+    diplomaMesh.position.set(13.6, 7.1, -19.65); // Position que tu as définie
+    diplomaMesh.rotation.y = 0; // Aligné face à la caméra
+    scene.add(diplomaMesh);
+}
+
 function updatePCImage() {
     if (!screenMesh) return;
     const fadeOut = setInterval(() => {
@@ -556,11 +580,12 @@ controls.zoomSpeed = 0.8;
 controls.minDistance = 3;
 controls.maxDistance = 14;
 
-let isZoomedPC = false, isZoomedTV = false;
+let isZoomedPC = false, isZoomedTV = false, isZoomedDiploma = false;
 const initialPositionPC = new THREE.Vector3(0, 5, 15);
 const zoomedPositionPC = new THREE.Vector3(-3, 2.4, 1);
 const zoomedPositionTV = new THREE.Vector3(-11.62, 6.69, -8.96);
 const zoomedRotationTV = new THREE.Euler(-108.29 * Math.PI / 180, 88.52 * Math.PI / 180, 108.29 * Math.PI / 180);
+const zoomedPositionDiploma = new THREE.Vector3(13.6, 7.1, -17.65); // Zoom à 5 unités devant le diplôme
 
 function animateZoom(targetPosition, targetRotation, targetFocus) {
     const duration = 300;
@@ -591,6 +616,15 @@ function toggleZoomPC() {
 function toggleZoomTV() {
     isZoomedTV = !isZoomedTV;
     animateZoom(isZoomedTV ? zoomedPositionTV : initialPositionPC, isZoomedTV ? zoomedRotationTV : new THREE.Euler(0, 0, 0), isZoomedTV ? tvMesh.position : screenMesh.position);
+}
+
+function toggleZoomDiploma() {
+    isZoomedDiploma = !isZoomedDiploma;
+    if (isZoomedDiploma) {
+        animateZoom(zoomedPositionDiploma, new THREE.Euler(0, 0, 0), diplomaMesh.position);
+    } else {
+        animateZoom(initialPositionPC, new THREE.Euler(0, 0, 0), new THREE.Vector3(0, 0, 0)); // Retour à la vue initiale
+    }
 }
 
 // Fonction pour vérifier si un objet est un enfant de ps5Model
@@ -629,7 +663,6 @@ infoModalContent.innerHTML = `
                 <li>Plafonnier (plafonnier.glb)</li>
                 <li>Lampes (lampe.glb)</li>
                 <li>Fenêtres (window.glb)</li>
-                <li>Cadres (cadre.glb)</li>
             </ul>
         </div>
         <div class="section">
@@ -703,6 +736,8 @@ window.addEventListener('click', (e) => {
                     window.open(link, "_blank");
                 }
             }
+        } else if (obj === diplomaMesh) {
+            toggleZoomDiploma();
         } else if (isZoomedTV) {
             stopTVGame();
             toggleZoomTV();
@@ -712,6 +747,8 @@ window.addEventListener('click', (e) => {
     } else if (isZoomedTV) {
         stopTVGame();
         toggleZoomTV();
+    } else if (isZoomedDiploma) {
+        toggleZoomDiploma();
     }
 });
 
